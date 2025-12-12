@@ -1,0 +1,150 @@
+:root{
+  --bg: #000;
+  --surface: #0b0b0f;
+  --surface-2: #101018;
+  --border: rgba(255,255,255,0.12);
+  
+  --text: rgba(255,255,255,0.92);
+  --muted: rgba(255,255,255,0.62);
+  
+  --accent: #a855f7;
+  --accent-2: #7c3aed;
+  --focus: rgba(168,85,247,0.45);
+}
+  
+*{ box-sizing: border-box; }
+  
+body{
+  margin: 0;
+  padding: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  text-align: center;
+}
+
+.container{
+  position: relative;
+  width: min(520px, calc(100vw - 32px));
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 28px;
+  border-radius: 14px;
+  box-shadow: 0 18px 55px rgba(0,0,0,0.65);
+}
+  
+h1{
+  margin: 0 0 18px;
+  font-size: 1.25rem;
+  font-weight: 650;
+  letter-spacing: 0.2px;
+}
+  
+.download-form{
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: stretch;
+}
+  
+.url-input,
+.bitrate-select,
+.download-button{
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 14px;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+  
+.url-input,
+.bitrate-select{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+}
+  
+.url-input::placeholder{ color: var(--muted); }
+  
+.url-input:focus,
+.bitrate-select:focus{
+  border-color: rgba(168,85,247,0.7);
+  box-shadow: 0 0 0 4px var(--focus);
+}
+  
+.bitrate-select{
+  cursor: pointer;
+  color-scheme: dark;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 40px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) 52%,
+    calc(100% - 12px) 52%;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+}
+  
+.bitrate-select option{
+  background: #0b0b0f;
+  color: rgba(255,255,255,0.92);
+}
+  
+.download-button{
+  font-family: inherit;
+  font-weight: 650;
+  background: linear-gradient(180deg, rgba(168,85,247,0.22), rgba(168,85,247,0.08));
+  border-color: rgba(168,85,247,0.55);
+  cursor: pointer;
+}
+  
+.download-button:hover{
+  border-color: rgba(168,85,247,0.85);
+}
+  
+.download-button:active{
+  box-shadow: none;
+}
+ 
+a{
+  color: rgba(216,180,254,0.95);
+  text-decoration: none;
+}
+  
+a:hover{
+  color: #fff;
+  text-decoration: underline;
+  text-decoration-color: rgba(168,85,247,0.7);
+  text-underline-offset: 3px;
+}
+  
+::selection{
+  background: rgba(168,85,247,0.35);
+}
+  
+.error-message {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+  color: rgba(255, 180, 180, 0.95);
+  font-size: 13px;
+}
+  
+.error-message p {
+  margin: 0;
+}

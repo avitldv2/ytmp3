@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>YouTube to MP3 Converter - avitld.xyz</title>
+        <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+        <link rel="icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
+    </head>
+    <body>
+        <div class="container">
+            <h1>YouTube to MP3 Converter</h1>
+            
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="error-message">
+                        {% for message in messages %}
+                            <p>{{ message }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            
+            <form action="/download" method="post" class="download-form" onsubmit="return validateUrl(this)">
+                <input type="url" name="url" placeholder="Enter YouTube URL" required class="url-input" pattern="https?://.*">
+                <select name="bitrate" class="bitrate-select">
+                    <option value="128" {% if saved_bitrate == '128' %}selected{% endif %}>128 kbps</option>
+                    <option value="192" {% if saved_bitrate == '192' %}selected{% endif %}>192 kbps</option>
+                    <option value="256" {% if saved_bitrate == '256' %}selected{% endif %}>256 kbps</option>
+                    <option value="320" {% if saved_bitrate == '320' %}selected{% endif %}>320 kbps</option>
+                </select>
+                <button type="submit" class="download-button">Download</button>
+                <p>Free to use with no ads or bloat, just a downloader.</p>
+            </form>
+        </div>
+        <script>
+            function validateUrl(form) {
+                const urlInput = form.querySelector('input[name="url"]');
+                const url = urlInput.value.trim();
+                try {
+                    const urlObj = new URL(url);
+                    if (!urlObj.protocol.startsWith('http')) {
+                        alert('Please enter a valid URL starting with http:// or https://');
+                        return false;
+                    }
+                    const hostname = urlObj.hostname.toLowerCase();
+                    const isYouTube = hostname.includes('youtube.com') || 
+                                     hostname.includes('youtu.be') || 
+                                     hostname.includes('youtube-nocookie.com');
+                    if (!isYouTube) {
+                        alert('Please enter a valid YouTube video URL.');
+                        return false;
+                    }
+                } catch (e) {
+                    alert('Please enter a valid URL.');
+                    return false;
+                }
+                return true;
+            }
+        </script>
+    </body>
+</html> 
