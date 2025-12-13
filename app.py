@@ -11,8 +11,11 @@ from urllib.parse import urlparse
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'change-this-secret-key-in-production')
 
-DOWNLOAD_FOLDER = Path('downloads')
+APP_ROOT = Path(__file__).parent.resolve()
+DOWNLOAD_FOLDER = APP_ROOT / 'downloads'
 DOWNLOAD_FOLDER.mkdir(exist_ok=True)
+
+COOKIES_FILE = APP_ROOT / 'cookies.txt'
 
 YOUTUBE_DOMAINS = [
     'youtube.com',
@@ -96,7 +99,7 @@ def download():
         return redirect(url_for('index'))
 
     ydl_opts = {
-        'format': 'bestaudio[protocol!=m3u8][ext=m4a]/bestaudio[protocol!=m3u8][ext=webm]/bestaudio[protocol!=m3u8]/bestaudio/best',
+        'format': 'bestaudio/best',
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'mp3',
@@ -113,6 +116,33 @@ def download():
         'noplaylist': True,
         'ignoreerrors': False,
     }
+    
+    cookies_file_path = None
+    if COOKIES_FILE.exists():
+        cookies_file_path = COOKIES_FILE.resolve()
+        app.logger.info(f"Found cookies file at: {cookies_file_path}")
+    else:
+        app.logger.info(f"Cookies file not found at: {COOKIES_FILE.absolute()}")
+    
+    if cookies_file_path and cookies_file_path.exists():
+        ydl_opts['cookiefile'] = str(cookies_file_path)
+        cookie_count = len([line for line in open(cookies_file_path) if line.strip() and not line.startswith('#')])
+        app.logger.info(f"Using cookies file: {cookies_file_path} ({cookie_count} cookies found)")
+    else:
+        app.logger.info("No cookies.txt file found, attempting to use browser cookies")
+        browsers = ['chrome', 'firefox', 'edge', 'safari', 'opera']
+        cookie_configured = False
+        for browser in browsers:
+            try:
+                ydl_opts['cookiesfrombrowser'] = (browser,)
+                app.logger.info(f"Attempting to use cookies from {browser} browser")
+                cookie_configured = True
+                break
+            except Exception as e:
+                app.logger.debug(f"Failed to use {browser} cookies: {e}")
+                continue
+        if not cookie_configured:
+            app.logger.warning("No cookies file found and browser cookies unavailable")
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -139,6 +169,15 @@ def download():
             flash('Error: FFmpeg is required but not found. Please install FFmpeg to convert videos to MP3.')
         elif 'Private video' in error_msg or 'unavailable' in error_msg.lower():
             flash('Error: This video is unavailable or private.')
+        elif 'bot' in error_msg.lower() or 'Sign in to confirm' in error_msg:
+            flash('Error: YouTube bot detection. Please check your cookies.txt file is valid and up to date.')
+            app.logger.error("YouTube bot detection triggered. Check cookies.txt file.")
+        elif 'cookies' in error_msg.lower() and 'database' in error_msg.lower():
+            if cookies_file_path and cookies_file_path.exists():
+                flash('Error: Cookies file found but yt-dlp is trying to use browser cookies. Please check cookies.txt format.')
+            else:
+                flash('Error: No cookies file found. Please create cookies.txt in the project root.')
+            app.logger.error(f"Cookie error: {error_msg}")
         else:
             flash(f'Error downloading video: {error_msg[:100]}')
         return redirect(url_for('index'))
@@ -147,6 +186,15 @@ def download():
         error_msg = str(e)
         if 'FFmpeg' in error_msg or 'ffmpeg' in error_msg:
             flash('Error: FFmpeg is required but not found. Please install FFmpeg to convert videos to MP3.')
+        elif 'bot' in error_msg.lower() or 'Sign in to confirm' in error_msg:
+            flash('Error: YouTube bot detection. Please check your cookies.txt file is valid and up to date.')
+            app.logger.error("YouTube bot detection triggered. Check cookies.txt file.")
+        elif 'cookies' in error_msg.lower() and 'database' in error_msg.lower():
+            if cookies_file_path and cookies_file_path.exists():
+                flash('Error: Cookies file found but yt-dlp is trying to use browser cookies. Please check cookies.txt format.')
+            else:
+                flash('Error: No cookies file found. Please create cookies.txt in the project root.')
+            app.logger.error(f"Cookie error: {error_msg}")
         else:
             flash(f'Error downloading video: {error_msg[:100]}')
         return redirect(url_for('index'))

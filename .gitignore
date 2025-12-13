@@ -15,4 +15,5 @@ downloads/
 *.log
 .env
 .venv
+cookies.txt
 
